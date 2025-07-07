@@ -1,0 +1,9 @@
+{
+    "topic_rules": {
+        "AI Safety": 100,
+        "Education": 200,
+        "Politics": 50,
+        "Macroeconomics": -50,
+        "Default": 0
+    }
+}

@@ -5,18 +5,32 @@ from readability import Document
 
 # Save already-processed URLs to a set
 try:
-    with open('processed_urls.txt', 'r') as f:
+    with open('config/processed_urls.txt', 'r') as f:
         processed_urls = {line.strip() for line in f}
 except FileNotFoundError:
     processed_urls = set()
 
 # Get a list of feeds to check from feeds.txt
 try:
-    with open('feeds.txt', 'r') as f:
+    with open('config/feeds.txt', 'r') as f:
         feeds = {line.strip() for line in f}
 except FileNotFoundError:
     feeds = set()
 
+def get_text(url):
+    """Uses Requests, Readability, BeautifulSoup to take a URL and get the text of the body
+    
+    Args:
+        url (str): The URL of the article to process"""
+
+    # Use requests library to fetch the URL
+    response = requests.get(url)    
+    # Readability and Soup to find the page's main content
+    doc = Document(response.text)
+    soup = BeautifulSoup(doc.summary(), 'html.parser')
+    text = soup.get_text()
+    return text
+     
 # Iterate through each feed
 for f in feeds:
     feed = feedparser.parse(f) 
@@ -26,12 +40,7 @@ for f in feeds:
             # Mark the URL as processed so it doesn't get double-checked
             processed_urls.add(url)
 
-            # Use requests library to fetch the URL
-            response = requests.get(url)    
-            # Readability and Soup to find the page's main content
-            doc = Document(response.text)
-            soup = BeautifulSoup(doc.summary(), 'html.parser')
-            text = soup.get_text()
+            text = get_text(url)
 
             print(text[0:100])
 
