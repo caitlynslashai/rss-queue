@@ -15,6 +15,7 @@
 $TaskName = "RSS Queue Poller"
 $PythonScriptName = "scraper.py"
 $BatchFileName = "run_scraper.bat"
+$LogFileName = "scraper.log" # Name for the log file
 
 # --- Scheduling Configuration ---
 # Define the schedule for the task.
@@ -32,10 +33,11 @@ if (-not $ProjectRoot) {
     $ProjectRoot = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
 }
 
-# Construct the full paths for the Python executable and the main script.
+# Construct the full paths for the Python executable, main script, and log file.
 $PythonExePath = Join-Path -Path $ProjectRoot -ChildPath "venv\Scripts\python.exe"
 $ScriptToRunPath = Join-Path -Path $ProjectRoot -ChildPath $PythonScriptName
 $BatchFilePath = Join-Path -Path $ProjectRoot -ChildPath $BatchFileName
+$LogFilePath = Join-Path -Path $ProjectRoot -ChildPath $LogFileName
 
 # Check if the venv python.exe exists. If not, exit with an error.
 if (-not (Test-Path $PythonExePath)) {
@@ -44,13 +46,14 @@ if (-not (Test-Path $PythonExePath)) {
     exit 1
 }
 
-# --- Create the .bat wrapper file ---
+# --- Create the .bat wrapper file with logging ---
 # This batch file changes to the correct directory before running the Python script.
-# This ensures that all relative file paths (like 'config/rules.json') work correctly.
+# It redirects all output (standard output and standard error) to a log file.
 $BatchFileContent = @"
 @echo off
 cd /d "$ProjectRoot"
-"$PythonExePath" "$ScriptToRunPath"
+REM The > operator redirects standard output, 2>&1 redirects standard error to the same place.
+"$PythonExePath" "$ScriptToRunPath" > "$LogFilePath" 2>&1
 "@
 
 Write-Host "Creating batch file at: $BatchFilePath"
@@ -80,7 +83,7 @@ schtasks.exe /Create /TN $TaskName /TR "$BatchFilePath" /SC WEEKLY /D $DaysOfWee
 if ($LASTEXITCODE -eq 0) {
     Write-Host "Task '$TaskName' has been successfully created/updated."
     Write-Host "It will run every $RepetitionIntervalMinutes minutes on all days between $StartTime for $RepetitionDurationHours hours."
-    Write-Host "IMPORTANT: You should add '$BatchFileName' to your .gitignore file."
+    Write-Host "IMPORTANT: You should add '$BatchFileName' and '$LogFileName' to your .gitignore file."
 } else {
     Write-Host "ERROR: Failed to create scheduled task. schtasks.exe exited with code $LASTEXITCODE"
 }

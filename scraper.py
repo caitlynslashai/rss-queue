@@ -8,12 +8,19 @@ from scoring import score
 import heapq
 
 # Load priority queue from persistent storage
+priority_queue = [] # Start with an empty list by default
 try:
     with open('config/priority_queue.json', 'r') as f:
+        # Load the data from the file
         priority_queue_data = json.load(f)
-        priority_queue = heapq.heapify(priority_queue_data)
-except FileNotFoundError:
-    priority_queue = []
+        # Check if the loaded data is a list before using it
+        if isinstance(priority_queue_data, list):
+            priority_queue = priority_queue_data
+            # IMPORTANT: heapify the list in-place. Do not reassign it.
+            heapq.heapify(priority_queue)
+except (FileNotFoundError, json.JSONDecodeError):
+    # If file doesn't exist or is empty/invalid, just use the empty list
+    pass
 
 # Save already-processed URLs to a set
 try:
