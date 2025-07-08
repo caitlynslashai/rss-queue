@@ -44,15 +44,23 @@ def get_text(url):
     """Uses Requests, Readability, BeautifulSoup to take a URL and get the text of the body
     
     Args:
-        url (str): The URL of the article to process"""
+        url (str): The URL of the article to process
+        
+    Returns:
+        str: The extracted text content from the article"""
 
-    # Use requests library to fetch the URL
-    response = requests.get(url)    
-    # Readability and Soup to find the page's main content
-    doc = Document(response.text)
-    soup = BeautifulSoup(doc.summary(), 'html.parser')
-    text = soup.get_text()
-    return text
+    try:
+        # Use requests library to fetch the URL
+        response = requests.get(url)    
+        response.raise_for_status()  # Raise an exception for bad status codes
+        # Readability and Soup to find the page's main content
+        doc = Document(response.text)
+        soup = BeautifulSoup(doc.summary(), 'html.parser')
+        text = soup.get_text()
+        return text
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching URL {url}: {e}")
+        return ""  # Return empty string on error
     
 # Iterate through each feed
 for f in feeds:

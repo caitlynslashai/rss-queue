@@ -30,13 +30,18 @@ def _get_characteristics_openai(text):
 
     client = OpenAI(api_key = openai_key)
     
-    completion = client.beta.chat.completions.parse(
-        model = "gpt-4.1-nano",
-        messages=[  
-            {"role": "system", "content": f"Extract the topic from the provided text from the options, which are {topic_names}"},
-            {"role": "user", "content": text}
-        ],
-        response_format = CharacteristicsResponse
-    )   
+    try:
+        completion = client.beta.chat.completions.parse(
+            model = "gpt-4.1-nano",
+            messages=[  
+                {"role": "system", "content": f"Extract the topic from the provided text from the options, which are {topic_names}"},
+                {"role": "user", "content": text}
+            ],
+            response_format = CharacteristicsResponse
+        )   
 
-    return completion.choices[0].message.parsed
+        return completion.choices[0].message.parsed
+    except Exception as e:
+        print(f"Error calling OpenAI API: {e}")
+        # Return a default response or re-raise the exception
+        return None
