@@ -10,9 +10,14 @@ from discord.ext import commands, tasks
 load_dotenv()
 BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
+# --- Robust Path Configuration ---
+# Get the absolute path of the directory where this script (bot.py) is located.
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Build absolute paths to the config files. This makes the script runnable from any directory.
+CONFIG_DIR = os.path.join(SCRIPT_DIR, 'config')
 # Define paths for the queue and the lock file
-QUEUE_FILE_PATH = 'config/priority_queue.json'
-LOCK_FILE_PATH = 'config/queue.lock'
+QUEUE_FILE_PATH = os.path.join(CONFIG_DIR, 'priority_queue.json')
+LOCK_FILE_PATH = os.path.join(CONFIG_DIR, 'queue.lock')
 
 
 # --- Bot Setup ---
