@@ -11,9 +11,12 @@ __pycache__/
 config/feeds.txt
 config/processed_urls.txt
 config/rules.json
-congif/priority_queue.json
+config/priority_queue.json
 
 # Secrets
 .env
 run_scraper.bat
 scraper.log
+
+# Temporary files
+config/queue.lock
