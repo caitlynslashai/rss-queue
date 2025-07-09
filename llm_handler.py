@@ -34,7 +34,7 @@ def _get_characteristics_openai(text):
         completion = client.beta.chat.completions.parse(
             model = "gpt-4.1-nano",
             messages=[  
-                {"role": "system", "content": f"Extract the topic from the provided text from the options, which are {topic_names}"},
+                {"role": "system", "content": f"Extract the topic from the provided text from the options, which are {topic_names}. When more than one topic would fit, pick the most specific one that applies."},
                 {"role": "user", "content": text}
             ],
             response_format = CharacteristicsResponse

@@ -1,0 +1,26 @@
+{
+    "topic_rules": {
+        "AI Safety": 100,
+        "Artificial Intelligence": 75,
+        "Technology": 25,
+        "Schooling": 200,
+        "Education": 150,
+        "Politics": -50,
+        "Call to Action (articles containing time-sensitive, actionable information)": 400,
+        "Macroeconomics": -50,
+        "Book Reviews": 150,
+        "Literature": 125,
+        "Relationships": 100,
+        "Dating": 75,
+        "Parenting": 100,
+        "Personal Development": 150,
+        "Psychology": 125,
+        "Mental Health": 175,
+        "Philosophy": 100,
+        "Art": 100,
+        "Creativity": 125,
+        "Health": 150,
+        "Science": 125,
+        "Default": 0
+    }
+}

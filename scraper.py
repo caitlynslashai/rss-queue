@@ -15,7 +15,8 @@ try:
         priority_queue_data = json.load(f)
         # Check if the loaded data is a list before using it
         if isinstance(priority_queue_data, list):
-            priority_queue = priority_queue_data
+            # Convert lists to tuples to maintain consistency
+            priority_queue = [tuple(item) if isinstance(item, list) else item for item in priority_queue_data]
             # IMPORTANT: heapify the list in-place. Do not reassign it.
             heapq.heapify(priority_queue)
 except (FileNotFoundError, json.JSONDecodeError):
