@@ -1,45 +1,44 @@
 # scoring.py
+import json
 
-def score(characteristics: dict, rules: dict, source_url: str) -> int:
+def score(characteristics: dict, rules: dict, source_url: str, scoring_config: list) -> int:
     """
-    Calculates a priority score for an article based on a set of rules
-    and the article's extracted characteristics.
+    Calculates a priority score for an article using a dynamic set of rules
+    defined in a configuration.
 
     Args:
         characteristics (dict): A dictionary containing the LLM-extracted
                                 characteristics like 'topic', 'actionability',
                                 and 'sentiment'.
-        rules (dict): The dictionary of rules loaded from rules.json.
+        rules (dict): The dictionary of all rule data loaded from rules.json.
         source_url (str): The source RSS feed URL of the article.
+        scoring_config (list): A list of rule configurations that specifies
+                               which rules to apply.
 
     Returns:
         int: The calculated total priority score for the article.
     """
     total_score = 0
 
-    # --- Rule 1: Score based on Topic ---
-    # Safely get the topic from the characteristics dictionary.
-    topic = characteristics.get('topic')
-    if topic:
-        # Safely get the score for this topic from the rules, defaulting to 0.
-        topic_score = rules.get("topic_rules", {}).get(topic, 0)
-        total_score += topic_score
+    # Loop through each rule defined in the scoring configuration.
+    for rule_config in scoring_config:
+        rule_key = rule_config.get("rule_key")
+        characteristic_key = rule_config.get("characteristic_key")
 
-    # --- Rule 2: Score based on Actionability ---
-    actionability = characteristics.get('actionability')
-    if actionability:
-        actionability_score = rules.get("actionability_rules", {}).get(actionability, 0)
-        total_score += actionability_score
+        # Get the specific set of rules (e.g., the 'topic_rules' dictionary).
+        rule_set = rules.get(rule_key, {})
 
-    # --- Rule 3: Score based on Sentiment ---
-    sentiment = characteristics.get('sentiment')
-    if sentiment:
-        sentiment_score = rules.get("sentiment_rules", {}).get(sentiment, 0)
-        total_score += sentiment_score
+        # Determine the value to look up in the rule set.
+        # This handles the special case for 'source_url', which is not in the
+        # LLM's characteristics dictionary.
+        if characteristic_key == "source_url":
+            value_to_score = source_url
+        else:
+            value_to_score = characteristics.get(characteristic_key)
         
-    # --- Rule 4: Score based on Source URL ---
-    # This rule doesn't depend on the LLM characteristics.
-    source_score = rules.get("source_rules", {}).get(source_url, 0)
-    total_score += source_score
+        # If we have a valid value, get its score from the rule set and add it.
+        if value_to_score:
+            points = rule_set.get(value_to_score, 0)
+            total_score += points
 
     return total_score

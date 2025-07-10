@@ -1,3 +1,21 @@
 {
-    "TRUNCATION_LENGTH": 2000
+  "TRUNCATION_LENGTH": 2000,
+  "SCORING_RULES": [
+    {
+      "rule_key": "topic_rules",
+      "characteristic_key": "topic"
+    },
+    {
+      "rule_key": "actionability_rules",
+      "characteristic_key": "actionability"
+    },
+    {
+      "rule_key": "sentiment_rules",
+      "characteristic_key": "sentiment"
+    },
+    {
+      "rule_key": "source_rules",
+      "characteristic_key": "source_url"
+    }
+  ]
 }

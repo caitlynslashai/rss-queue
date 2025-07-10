@@ -177,6 +177,10 @@ Typical costs are minimal for personal use with a few RSS feeds.
 
 ## Troubleshooting
 
+## Known Issues
+
+- The bot currently only syncs articles to disk every one minute. If the bot is closed or crashes within one minute of running the /next command, the article will not be removed from queue.
+
 ### Logs
 
 Check `scraper.log` for detailed execution logs and error messages.

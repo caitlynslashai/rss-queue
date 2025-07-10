@@ -16,10 +16,9 @@ BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Build absolute paths to the config files. This makes the script runnable from any directory.
 CONFIG_DIR = os.path.join(SCRIPT_DIR, 'config')
-
-# STEP 1: Update file paths and lock file name
 ARTICLES_FILE_PATH = os.path.join(CONFIG_DIR, 'articles.json')
 RULES_FILE_PATH = os.path.join(CONFIG_DIR, 'rules.json')
+CONFIG_FILE_PATH = os.path.join(CONFIG_DIR, 'config.json')
 LOCK_FILE_PATH = os.path.join(CONFIG_DIR, 'articles.lock')
 
 
@@ -27,7 +26,6 @@ LOCK_FILE_PATH = os.path.join(CONFIG_DIR, 'articles.lock')
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="/", intents=intents)
 
-# STEP 1: Rename the in-memory variable
 # This list will act as the in-memory cache for the articles database.
 in_memory_articles = []
 
@@ -38,10 +36,8 @@ async def on_ready():
     """Event handler for when the bot has successfully connected."""
     print(f'We have logged in as {bot.user}')
     
-    # STEP 2: Call the updated loading function
     load_articles_from_disk()
     
-    # STEP 4: Start the updated background sync task
     sync_articles_to_disk.start()
     
     try:
@@ -59,18 +55,19 @@ async def next_article(interaction: discord.Interaction):
     Scores all articles based on the latest rules, then fetches, posts,
     and removes the top item from the queue.
     """
-    # Defer the response to let Discord know we're working on it.
     await interaction.response.defer()
 
-    # 1. Load the latest rules on every call.
+    # Load the latest rules and scoring configuration on every call.
     try:
         with open(RULES_FILE_PATH, 'r') as f:
             rules = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        await interaction.followup.send("Error: `rules.json` not found or is invalid. Cannot score articles.")
+        with open(CONFIG_FILE_PATH, 'r') as f:
+            config = json.load(f)
+            scoring_config = config.get("SCORING_RULES", [])
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        await interaction.followup.send(f"Error: A required configuration file could not be loaded. Details: {e}")
         return
 
-    # 2. Check if the in-memory cache is empty.
     if not in_memory_articles:
         await interaction.followup.send("The reading queue is empty!")
         return
@@ -79,41 +76,37 @@ async def next_article(interaction: discord.Interaction):
     start_time = time.perf_counter()
 
     scored_articles = []
-    # 3. Loop through the in-memory articles and score each one.
+    # Loop through the in-memory articles and score each one using the generic engine.
     for article in in_memory_articles:
-        # The score function needs the characteristics dict and the source_url
         article_score = score(
             characteristics=article.get('characteristics', {}),
             rules=rules,
-            source_url=article.get('source_url', '')
+            source_url=article.get('source_url', ''),
+            scoring_config=scoring_config
         )
         scored_articles.append((article_score, article))
 
-    # 4. Sort the list by score in descending order.
+    # Sort the list by score in descending order.
     scored_articles.sort(key=lambda x: x[0], reverse=True)
     
     end_time = time.perf_counter()
     duration = end_time - start_time
     print(f"Scoring and sorting {len(scored_articles)} articles took {duration:.4f} seconds.")
-    # --- End of Scoring and Sorting ---
 
-    # 5. Get the top article from the sorted list.
-    # The item is a tuple: (score, article_dictionary)
+    # Get the top article from the sorted list.
     top_article_data = scored_articles[0]
     top_article_score = top_article_data[0]
     top_article_dict = top_article_data[1]
 
-    # 6. Remove the article from the main in-memory list.
-    # We need to find the exact dictionary object to remove.
+    # Remove the article from the main in-memory list so it isn't served again.
     in_memory_articles.remove(top_article_dict)
 
-    # 7. Send the URL as the response.
+    # Send the URL and score as the response.
     url_to_send = top_article_dict.get('url', 'URL not found.')
     await interaction.followup.send(f"**Score: {top_article_score}**\n{url_to_send}")
 
 
 # --- Background Task ---
-# STEP 4: Update the background sync task
 @tasks.loop(minutes=1.0)
 async def sync_articles_to_disk():
     """Periodically saves the in-memory articles database back to the persistent file."""
@@ -142,7 +135,6 @@ async def sync_articles_to_disk():
 
 
 # --- Helper Function ---
-# STEP 2: Update the loading function
 def load_articles_from_disk():
     """Loads the articles from the JSON file into the in-memory cache."""
     global in_memory_articles
