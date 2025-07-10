@@ -8,8 +8,14 @@ An intelligent RSS feed aggregator that uses AI to classify and prioritize artic
 - **Customizable Scoring**: Define your own topic preferences with positive/negative scoring weights
 - **Persistent Queue**: Maintains a priority queue of articles across runs
 - **Duplicate Prevention**: Tracks processed URLs to avoid re-processing articles
-- **Discord Bot Integration**: Optional Discord bot for notifications and interaction
+- **Discord Bot Integration**: Discord bot for notifications and interaction
 - **Automated Scheduling**: Windows Task Scheduler integration for regular updates
+
+## TODO
+
+- **LLM Customization**: A Discord-accessible LLM command that modifies project configuration, allowing for easy refactoring of rules
+- **Reading Channels**: Ability for administrators to designate certain channels as "reading channels"
+- **Setup Wizard**: Script to automatically set up files for individual user settings
 
 ## Project Structure
 
@@ -28,7 +34,7 @@ rss-queue/
     ├── feeds.example.txt # Example RSS feeds
     ├── rules.json      # Topic scoring rules (create from example)
     ├── rules.example.json # Example topic rules
-    ├── priority_queue.json # Persistent article queue
+    ├── articles.json # Persistent article metadata
     └── processed_urls.txt  # Tracking file for processed articles
 ```
 
@@ -38,7 +44,7 @@ rss-queue/
 
 - Python 3.8+
 - OpenAI API key
-- (Optional) Discord bot token for bot functionality
+- Discord bot token for bot functionality
 
 ### Installation - Windows
 
@@ -64,7 +70,6 @@ The setup script will:
 - Create a Python virtual environment
 - Install required dependencies
 - Set up Windows Task Scheduler for automated runs
-- Create necessary configuration files
 
 ### Manual Installation
 
@@ -153,18 +158,6 @@ This will:
 
 The setup script configures Windows Task Scheduler to run the scraper automatically. You can modify the schedule through Task Scheduler or by editing the setup script.
 
-### Discord Bot (Optional)
-
-Run the Discord bot for notifications:
-```bash
-python bot.py
-```
-
-Make sure to:
-1. Set `DISCORD_BOT_TOKEN` in your `.env` file
-2. Invite the bot to your server with appropriate permissions
-3. The bot includes slash commands (like `/hello`)
-
 ## How It Works
 
 1. **Feed Processing**: The scraper reads RSS feeds from `config/feeds.txt`
@@ -176,30 +169,17 @@ Make sure to:
 
 ## API Costs
 
-The system uses OpenAI's `gpt-4o-nano` model for cost efficiency. Costs depend on:
+The system uses OpenAI's `gpt-4.1-nano` model for cost efficiency. Costs depend on:
 - Number of new articles processed
 - `TRUNCATION_LENGTH` setting (longer = more expensive)
-- Frequency of runs
 
 Typical costs are minimal for personal use with a few RSS feeds.
 
 ## Troubleshooting
 
-### Common Issues
-
-- **OpenAI API errors**: Check your API key and account credits
-- **No articles found**: Verify RSS feed URLs are valid and accessible
-
 ### Logs
 
 Check `scraper.log` for detailed execution logs and error messages.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
 
 ## License
 

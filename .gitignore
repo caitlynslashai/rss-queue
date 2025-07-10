@@ -11,7 +11,7 @@ __pycache__/
 config/feeds.txt
 config/processed_urls.txt
 config/rules.json
-config/priority_queue.json
+
 
 # Secrets
 .env
@@ -20,3 +20,6 @@ scraper.log
 
 # Temporary files
 config/queue.lock
+config/priority_queue.json
+# Priority Queue file is deprecated, left in .gitignore
+config/articles.json

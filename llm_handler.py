@@ -10,11 +10,18 @@ load_dotenv()
 with open('config/rules.json', 'r') as f:
     rules = json.load(f)
     topic_names = list(rules['topic_rules'].keys())
+    actionability_names = list(rules['actionability_rules'].keys())
+    sentiment_names = list(rules['sentiment_rules'].keys())
     TopicLiteral = Literal[*rules['topic_rules']]
+    ActionabilityLiteral = Literal[*actionability_names]
+    SentimentLiteral = Literal[*sentiment_names]
+
 
 # Define base format: in this case, a topic from the available list
 class CharacteristicsResponse(BaseModel):
     topic: TopicLiteral = Field(description="The single most relevant topic for the article")
+    actionability: ActionabilityLiteral = Field(description="Whether the article contains actionable information")
+    sentiment: SentimentLiteral = Field(description="The general sentiment of the article.")
 
 
 def get_characteristics(model, text):
@@ -34,7 +41,7 @@ def _get_characteristics_openai(text):
         completion = client.beta.chat.completions.parse(
             model = "gpt-4.1-nano",
             messages=[  
-                {"role": "system", "content": f"Extract the topic from the provided text from the options, which are {topic_names}. When more than one topic would fit, pick the most specific one that applies."},
+                {"role": "system", "content": f"Extract the topic from the provided text from the options, which are {topic_names}. When more than one topic would fit, pick the most specific one that applies. Also extract the actionability ([which should be 'Yes' or 'No']) and the sentiment('Positive', 'Neutral', or 'Negative')."},
                 {"role": "user", "content": text}
             ],
             response_format = CharacteristicsResponse
